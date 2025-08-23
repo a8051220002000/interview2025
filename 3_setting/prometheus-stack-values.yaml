@@ -1,0 +1,48 @@
+# 啟用 Prometheus Operator 並允許跑在有 taint 的 infra node
+prometheus-operator:
+  tolerations:
+    - key: "role"
+      operator: "Equal"
+      value: "infra"
+      effect: "NoSchedule"
+  nodeSelector:
+    role: infra
+
+# Prometheus Server 本體
+prometheus:
+  enabled: true
+  prometheusSpec:
+    tolerations:
+      - key: "role"
+        operator: "Equal"
+        value: "infra"
+        effect: "NoSchedule"
+    nodeSelector:
+      role: infra
+
+# 關閉 Alertmanager
+alertmanager:
+  enabled: false
+
+# 關閉 Grafana
+grafana:
+  enabled: false
+
+# Node Exporter (DaemonSet → 跑在所有節點，不受 taint 影響)
+nodeExporter:
+  enabled: true
+  tolerations:
+    - operator: "Exists"
+  hostNetwork: true
+  hostPID: true
+
+# kube-state-metrics (跑在 infra node)
+kubeStateMetrics:
+  enabled: true
+  tolerations:
+    - key: "role"
+      operator: "Equal"
+      value: "infra"
+      effect: "NoSchedule"
+  nodeSelector:
+    node-role.kubernetes.io/infra: "true"

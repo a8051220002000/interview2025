@@ -1,0 +1,5 @@
+# 忽略 VSCode 設定資料夾
+.vscode/
+
+# 忽略特定檔案
+question.md

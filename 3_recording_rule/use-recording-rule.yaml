@@ -1,0 +1,70 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kube-prometheus-stack-use-recording.rules
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack   # 和 helm release 名稱一致
+spec:
+  groups:
+      - name: use-method-rules
+        interval: 30s
+        rules:
+        # ========== CPU ==========
+        - record: node:cpu_utilisation:avg1m
+          expr: 1 - avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[1m]))
+          labels:
+            method: use
+
+        - record: node:cpu_saturation:avg1m
+          expr: avg by (instance) (irate(node_cpu_seconds_total{mode="iowait"}[1m]))
+          labels:
+            method: use
+
+        # ========== Memory ==========
+        - record: node:memory_utilisation:ratio
+          expr: 1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)
+          labels:
+            method: use
+
+        - record: node:memory_saturation:bytes
+          expr: node_memory_SwapUsed_bytes
+          labels:
+            method: use
+
+        - record: node:memory_errors:count
+          expr: node_memory_Errors_total
+          labels:
+            method: use
+
+        # ========== Filesystem ==========
+        - record: node:fs_utilisation:ratio
+          expr: (node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs|fuse.portal"} 
+                - node_filesystem_avail_bytes{fstype!~"tmpfs|fuse.lxcfs|fuse.portal"})
+                / node_filesystem_size_bytes{fstype!~"tmpfs|fuse.lxcfs|fuse.portal"}
+          labels:
+            method: use
+
+        - record: node:fs_saturation:inodes
+          expr: 1 - (node_filesystem_files_free{fstype!~"tmpfs|fuse.lxcfs|fuse.portal"} 
+                    / node_filesystem_files{fstype!~"tmpfs|fuse.lxcfs|fuse.portal"})
+          labels:
+            method: use
+
+        # ========== Network ==========
+        - record: node:network_utilisation:rate1m
+          expr: irate(node_network_receive_bytes_total[1m]) 
+              + irate(node_network_transmit_bytes_total[1m])
+          labels:
+            method: use
+
+        - record: node:network_saturation:ratio
+          expr: irate(node_network_transmit_queue_length[1m])
+          labels:
+            method: use
+
+        - record: node:network_errors:rate1m
+          expr: irate(node_network_receive_errs_total[1m]) 
+              + irate(node_network_transmit_errs_total[1m])
+          labels:
+            method: use

@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - /data/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro,Z
+      - /data/grafana/data:/var/lib/grafana:Z
+    networks:
+      - kind
+    restart: unless-stopped
+
+networks:
+  kind:
+    external: true
