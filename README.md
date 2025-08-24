@@ -1,21 +1,21 @@
 ### 4.6 請說明以上的效能監控儀表板的每個panel內容。
 
-1. Node exporter 以主機為單位出發，可以觀察主機 cpu / memory / disk / network 的忙碌程度
+1. Node exporter 以`主機`為單位出發，可以觀察主機 `cpu / memory / disk / network` 的忙碌程度
 2. 以k8s角度出發觀察cluster
-   1. worker node 是否有壓力
-   2. 每個node的忙碌程度，避免單一主機過忙
-   3. POD 是否有失敗 / 重啟 / POD有在特定時間擴增或是縮減。
-   4. CronJob Pod 是否有成功執行
+   1. worker node 是否有`壓力`
+   2. 每個node的忙碌程度，避免`單台Node`過忙
+   3. POD 是否有`失敗 / 重啟 / POD` 是否於特定時間擴增或是縮減。
+   4. CronJob Pod 是否有`成功執行或是失敗紀錄`
 3. recoding_rule有送進PrometheusRule但無法取出數值
    1. 以使用率 / 錯誤率等方式 觀察集群是否健康
 4. etcd
-   1. 是否有產生選舉 
+   1. 是否有產生選舉，因為 cluster 架構的服務每當有選舉發生通常會有`寫入暫停 / 讀取到舊資料`等情況發生 
    2. 同步速度是否無異常
    3. key / value 增長是否正常
 5. Prometheus Server 角度查看
-   1. 取得各監控是否皆正常
-   2. Scrape速度 / 錯誤 是否皆正常
-   3. 是否資源接正常
+   1. `取得各監控`反應速度是否皆正常
+   2. Scrape 速度 / 錯誤 是否皆正常
+   3. 是否資源皆正常
 
 
 ### 4.7 請說明要如何以上建立的監控儀表板觀察CPU Throttling現象或是需要再新增新的監控panel或是儀表板來監控，請說明新增的原因。
