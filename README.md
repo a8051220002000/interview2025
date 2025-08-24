@@ -9,7 +9,12 @@
     - 配置檔以及操作說明檔請參閱 [說明文件](step.md)
 
 3.  配置檔案
-    - 皆已附上連結
+    - 1_kind - 安裝kind config
+    - 3_recording_rule - 設定prometheus recording_rule 豐富 dashboard
+    - 3_setting - 安裝 promethues-stack helm value.yaml
+    - 4_grafana - 透過docker-compose 安裝grafana / dashboard / datasource 設定備份於此
+    - 5_statefulset - 設定auto scale sts 設定
+    - img - dashboard 截圖 / 架構圖
 4. 說明文件（Markdown 格式）
     - 配置檔以及說明檔請參閱 [說明文件](step.md)
 
