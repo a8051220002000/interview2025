@@ -44,17 +44,15 @@ spec:
           value: "application"
           effect: "NoSchedule"
       containers:
-      - name: demo-app
-        image: nginx:1.25
+      - name: php-apache
+        image: registry.k8s.io/hpa-example
         ports:
-          - containerPort: 80
+        - containerPort: 80
         resources:
-          requests:
-            cpu: 200m
-            memory: 256Mi
           limits:
             cpu: 500m
-            memory: 512Mi
+          requests:
+            cpu: 200m
 
 ---
 apiVersion: autoscaling/v2

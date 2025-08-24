@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: curl-tester
+  namespace: application   # 改成 demo-app 所在的 namespace
+spec:
+  tolerations:
+  - key: "role"
+    operator: "Equal"
+    value: "application"
+    effect: "NoSchedule"
+  restartPolicy: Never
+  containers:
+  - name: curl
+    image: alpine:3.20
+    command: ["sh", "-c"]
+    args:
+      - |
+        while sleep 0.01; do wget -q -O- http://demo-app.application.svc.cluster.local/
+        done
+

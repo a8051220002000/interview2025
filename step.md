@@ -1,9 +1,36 @@
 1. kind create cluster
-   
+
    ```bash
    kind create cluster --config 1_kind/kind-cluster.yaml
    ```
-3. 設定 K8S 標籤
+
+2. 安裝 helm 為了後續安裝 prometheus-stack
+
+   ```bash
+   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+   # prometheus 監控使用
+   helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+   #  for metics-server
+   helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
+   ```
+
+3. 監控安裝
+
+   ```bash
+   kubectl create ns monitoring
+   # 監控
+   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+     -n monitoring \
+     -f 3_setting/prometheus-stack-values.yaml
+   # 安裝metrics-server hpa 需要用到
+   helm upgrade --install metrics-server metrics-server/metrics-server \
+      -n monitoring \
+      -f 3_setting/metics-server-values.yaml
+   # 驗證
+   kubectl get po -n monitoring
+   ```
+
+4. 設定 K8S 標籤
 
    1. label infra and taint
 
@@ -32,23 +59,6 @@
       exam-worker2         Ready    <none>          30m   v1.33.1   application   application
       exam-worker3         Ready    <none>          30m   v1.33.1   application   application
       ```
-   4. 安裝 helm 為了後續安裝 prometheus-stack
-
-      ```bash
-      curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-      ```
-
-4. 監控安裝
-
-   ```bash
-   kubectl create ns monitoring
-
-   helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
-     -n monitoring \
-     -f 3_setting/prometheus-stack-values.yaml
-   ```
 
 5. 安裝外部 grafana
 
@@ -67,6 +77,7 @@
    3. 持久化 grafana 設定
       ```bash
         mkdir /data/grafana/provisioning
+        # 複製dashboard設定至容器內
         cp 4_grafana/datasource.yml /data/grafana/provisioning/datasources
         mkdir /data/grafana/data
       ```
@@ -80,6 +91,23 @@
       ```
 
 6. 設定 Autoscale
+   1. 部屬
    ```bash
    kubectl apply -f 5_statefulset/deployment.yaml
+   ```
+   2. 確認 auto scale 正常
+   ```bash
+      [root@exam-kind-01 5_statefulset]# kubectl get hpa -n application
+      NAME           REFERENCE              TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+      demo-app-hpa   StatefulSet/demo-app   cpu: <unknown>/50%   2         10        2          16h
+      [root@exam-kind-01 5_statefulset]# 
+   ```
+   3. 驗證 hpa (壓力測試)
+   ```bash
+      kubectl apply -f 5_statefulset/benchmark.yaml
+
+      # 查看到正常hpa
+      [root@exam-kind-01 sysadmin]# k get hpa -n application 
+      NAME           REFERENCE              TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+      demo-app-hpa   StatefulSet/demo-app   cpu: 53%/50%   2         10        6          67m
    ```
